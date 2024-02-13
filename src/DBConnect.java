@@ -150,6 +150,44 @@ public class DBConnect {
         }
 
     }
+    public void supprimer(int selectedID) {
+        String url = "jdbc:mysql://localhost:3306";
+        String username = "root";
+        String password = "";
+        try { // this block creates the database and the table if they don't exist
+
+            ////block to connect to the database
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection connection = DriverManager.getConnection(url, username, password);
+            System.out.println(connection);//entré dans la base de donnée
+            Statement statement = connection.createStatement();
+
+            try {
+                statement.execute("CREATE DATABASE DB_biblio");
+            } catch (java.sql.SQLException create) {
+                System.out.println("la base de donnée biblio existe déjà");
+            }
+            statement.execute("USE DB_biblio");
+            try {
+                statement.execute("CREATE TABLE Livres(ID int PRIMARY KEY AUTO_INCREMENT, Libelle VARCHAR(255), Auteur VARCHAR(255), Date VARCHAR(255), Code_barre VARCHAR(255), Disponibilite BOOLEAN)");
+            } catch (java.sql.SQLSyntaxErrorException table_create) {
+                System.out.println("La table existe déjà");
+            }
+            ////end of the block to connect
+            System.out.println("selected Id= " + selectedID);
+
+            String query = "DELETE FROM `livres` WHERE `ID`= ?";
+            PreparedStatement myStmt = connection.prepareStatement(query);
+            myStmt.setInt(1, selectedID);
+            int res = myStmt.executeUpdate();
+
+            System.out.println("fin de suppression de l'ID n-"+ selectedID +"res= "+ res);
+            connection.close();
+            System.out.println("connection fermée");
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
     //function to display every row
     //function to add a row
     //function to modify a row

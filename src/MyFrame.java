@@ -21,7 +21,7 @@ import java.util.Objects;
 public class MyFrame extends JFrame implements ActionListener {
     //
     int selectedID = -1;
-    int rowindex;
+    int rowindex = -1;
 
     //JTextfields
     JTextField T_libelle;
@@ -268,7 +268,7 @@ public class MyFrame extends JFrame implements ActionListener {
 
         DBConnect db1 = new DBConnect();
         ArrayList<Livre> livres = db1.peupler();
-        if(livres.isEmpty()){
+        if(livres == null){
             System.out.println("empty database");
         }
         else {
@@ -304,28 +304,31 @@ public class MyFrame extends JFrame implements ActionListener {
             public void valueChanged(ListSelectionEvent event) {
                 if(!event.getValueIsAdjusting()){
                     rowindex = table.getSelectedRow();
-                    System.out.println("index " +rowindex);
-                    selectedID = Integer.parseInt(table.getValueAt(rowindex, 0).toString()) ;
-                    System.out.println("selected ID = "+selectedID);
+                    if(rowindex>=0){
+                        System.out.println("value changed indddeed index " +rowindex);
+                        selectedID = Integer.parseInt(table.getValueAt(rowindex, 0).toString()) ;
+                        System.out.println("selected ID = "+selectedID);
 
-                    String selectedLib =  table.getValueAt(table.getSelectedRow(), 1).toString();
-                    T_libelle.setText(selectedLib);
+                        String selectedLib =  table.getValueAt(table.getSelectedRow(), 1).toString();
+                        T_libelle.setText(selectedLib);
 
-                    String selectedAut =  table.getValueAt(table.getSelectedRow(), 2).toString();
-                    T_auteur.setText(selectedAut);
+                        String selectedAut =  table.getValueAt(table.getSelectedRow(), 2).toString();
+                        T_auteur.setText(selectedAut);
 
-                    Date selectedDate = null;
-                    try {
-                        selectedDate = new SimpleDateFormat("dd-MM-yyyy").parse(table.getValueAt(table.getSelectedRow(), 3).toString());
-                    } catch (ParseException e) {
-                        throw new RuntimeException(e);
-                    }
-                    T_date.setDate(selectedDate);
+                        Date selectedDate = null;
+                        try {
+                            selectedDate = new SimpleDateFormat("dd-MM-yyyy").parse(table.getValueAt(table.getSelectedRow(), 3).toString());
+                        } catch (ParseException e) {
+                            throw new RuntimeException(e);
+                        }
+                        T_date.setDate(selectedDate);
 
-                    String selectedCode =  table.getValueAt(table.getSelectedRow(), 4).toString();
-                    T_code.setText(selectedCode);
+                        String selectedCode =  table.getValueAt(table.getSelectedRow(), 4).toString();
+                        T_code.setText(selectedCode);
 
-                    dispo.setSelected(Boolean.parseBoolean(table.getValueAt(table.getSelectedRow(), 5).toString()));
+                        dispo.setSelected(Boolean.parseBoolean(table.getValueAt(table.getSelectedRow(), 5).toString()));
+                        System.out.println("endddd");
+                    }else System.out.println("invalid index");
 
                 }
             }
@@ -403,7 +406,22 @@ public class MyFrame extends JFrame implements ActionListener {
             }
         }
         if(e.getSource()==supprimer){
-            System.out.println("supprimer cmd");
+            System.out.println("supprimer cmd + row index = "+rowindex);
+            int db_id = selectedID;
+            int db_index = rowindex;
+            if(db_id != -1){
+                System.out.println("row index = "+rowindex);
+                tableModel.removeRow(db_index);
+
+                System.out.println("row removed");
+                DBConnect dbConnect = new DBConnect();
+                dbConnect.supprimer(db_id);
+                System.out.println("deleted in database");
+            }
+            T_date.setDate(null);
+            T_code.setText(null);
+            T_libelle.setText(null);
+            T_auteur.setText(null);
         }
         if(e.getSource()==modifier){
             if(selectedID != -1){
@@ -424,6 +442,10 @@ public class MyFrame extends JFrame implements ActionListener {
 
                 DBConnect dbConnect = new DBConnect();
                 dbConnect.modifier(l1);
+                T_date.setDate(null);
+                T_code.setText(null);
+                T_libelle.setText(null);
+                T_auteur.setText(null);
             }
         }
     }
