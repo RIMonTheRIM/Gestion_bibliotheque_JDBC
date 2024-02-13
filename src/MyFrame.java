@@ -1,28 +1,22 @@
 import com.toedter.calendar.JDateChooser;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
-import javax.swing.text.TableView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 
 public class MyFrame extends JFrame implements ActionListener {
-    //
+    //variables
     int selectedID = -1;
     int rowindex = -1;
-
     //JTextfields
     JTextField T_libelle;
     JTextField T_auteur;
@@ -191,13 +185,6 @@ public class MyFrame extends JFrame implements ActionListener {
         l_titre.setBackground(new Color(8, 217, 214));
         l_titre.setBounds(0,0,700,60);
 
-        JLabel l_message = new JLabel("<html>Double clic pour sélectionner<br/> une ligne du tableau!!</html>",SwingConstants.LEADING);
-        l_message.setFont(new Font("Clash Grotesk", Font.BOLD,25));
-        l_message.setForeground(Color.white);
-        l_message.setOpaque(true);
-        l_message.setBackground(new Color(37, 42, 52));
-        l_message.setBounds(0,0,700,60);
-
         //panels
         JPanel left0 = new JPanel();
         left0.add(l_titre);
@@ -237,11 +224,6 @@ public class MyFrame extends JFrame implements ActionListener {
         left5.add(modifier);
         left5.add(supprimer);
 
-        JPanel left6 = new JPanel();
-        left6.setLayout(null);
-        left6.setBackground(new Color(37, 42, 52));
-        left6.add(l_message);
-
         //panel input left
         JPanel p_input = new JPanel();
         p_input.setPreferredSize(new Dimension(550, 900));
@@ -252,11 +234,9 @@ public class MyFrame extends JFrame implements ActionListener {
         p_input.add(left3);
         p_input.add(left4);
         p_input.add(left5);
-        p_input.add(left6);
         p_input.setLayout(new GridLayout(7,1));
 
         //Jtable
-
         JTable table = new JTable(tableModel);
         tableModel.addColumn("ID");
         tableModel.addColumn("Libellé");
@@ -281,8 +261,6 @@ public class MyFrame extends JFrame implements ActionListener {
             }
         }
 
-//        tableModel.addRow(tab_Table2);
-
         table.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
         table.getColumnModel().getColumn(0).setPreferredWidth(10);
         table.getColumnModel().getColumn(3).setPreferredWidth(100);
@@ -300,37 +278,35 @@ public class MyFrame extends JFrame implements ActionListener {
         table.setDefaultEditor(Object.class, null);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setOpaque(true);
-        table.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
-            public void valueChanged(ListSelectionEvent event) {
-                if(!event.getValueIsAdjusting()){
-                    rowindex = table.getSelectedRow();
-                    if(rowindex>=0){
-                        System.out.println("value changed indddeed index " +rowindex);
-                        selectedID = Integer.parseInt(table.getValueAt(rowindex, 0).toString()) ;
-                        System.out.println("selected ID = "+selectedID);
+        table.getSelectionModel().addListSelectionListener(event -> {
+            if(!event.getValueIsAdjusting()){
+                rowindex = table.getSelectedRow();
+                if(rowindex>=0){
+                    System.out.println("value changed indddeed index " +rowindex);
+                    selectedID = Integer.parseInt(table.getValueAt(rowindex, 0).toString()) ;
+                    System.out.println("selected ID = "+selectedID);
 
-                        String selectedLib =  table.getValueAt(table.getSelectedRow(), 1).toString();
-                        T_libelle.setText(selectedLib);
+                    String selectedLib =  table.getValueAt(table.getSelectedRow(), 1).toString();
+                    T_libelle.setText(selectedLib);
 
-                        String selectedAut =  table.getValueAt(table.getSelectedRow(), 2).toString();
-                        T_auteur.setText(selectedAut);
+                    String selectedAut =  table.getValueAt(table.getSelectedRow(), 2).toString();
+                    T_auteur.setText(selectedAut);
 
-                        Date selectedDate = null;
-                        try {
-                            selectedDate = new SimpleDateFormat("dd-MM-yyyy").parse(table.getValueAt(table.getSelectedRow(), 3).toString());
-                        } catch (ParseException e) {
-                            throw new RuntimeException(e);
-                        }
-                        T_date.setDate(selectedDate);
+                    Date selectedDate;
+                    try {
+                        selectedDate = new SimpleDateFormat("dd-MM-yyyy").parse(table.getValueAt(table.getSelectedRow(), 3).toString());
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                    T_date.setDate(selectedDate);
 
-                        String selectedCode =  table.getValueAt(table.getSelectedRow(), 4).toString();
-                        T_code.setText(selectedCode);
+                    String selectedCode =  table.getValueAt(table.getSelectedRow(), 4).toString();
+                    T_code.setText(selectedCode);
 
-                        dispo.setSelected(Boolean.parseBoolean(table.getValueAt(table.getSelectedRow(), 5).toString()));
-                        System.out.println("endddd");
-                    }else System.out.println("invalid index");
+                    dispo.setSelected(Boolean.parseBoolean(table.getValueAt(table.getSelectedRow(), 5).toString()));
+                    System.out.println("endddd");
+                }else System.out.println("invalid index");
 
-                }
             }
         });
 
@@ -360,49 +336,47 @@ public class MyFrame extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==generer){
             System.out.println("bouton générer");
-            String format = SDFormat.format(T_date.getDate());
-            System.out.println(format);
-            String[] dateSep = format.split("-");
-            System.out.println("année "+ dateSep[2]);
-            String  genere = T_libelle.getText().charAt(0) + String.valueOf(T_libelle.getText().charAt(1)) + T_auteur.getText().charAt(T_auteur.getText().length()-2) + T_auteur.getText().charAt(T_auteur.getText().length()-1)+dateSep[2];
-            T_code.setText(genere);
-            System.out.println("généré");
+            genererSteps();
         }
         if(e.getSource()==ajouter){
-            Livre l1 = new Livre();
-            int error = 0;
-            System.out.println("ajouterr");
-            l1.setLibelle(T_libelle.getText());
-            if(l1.getLibelle()==null){
-                error+=1;
-            }
-            l1.setAuteur(T_auteur.getText());
-            if(l1.getAuteur()==null){
-                error+=1;
-            }
-            l1.setDate(SDFormat.format(T_date.getDate()));
-            if(l1.getDate()==null){
-                error+=1;
-            }
-            l1.setCode(T_code.getText());
-            if(l1.getCode()==null){
-                error+=1;
-            }
-            if(error>0){
-                //error message
-                System.out.println("error");
-            }
-            else {
-                table_count += 1;
-                l1.setID(table_count);
+            if(verifText()>0){
+                System.out.println("veuillez remplir tous les champs et générer le code");
+            }else {
+                genererSteps();
+                Livre l1 = new Livre();
+                int error = 0;
+                System.out.println("ajouterr");
+                l1.setLibelle(T_libelle.getText());
+                if(l1.getLibelle()==null){
+                    error+=1;
+                }
+                l1.setAuteur(T_auteur.getText());
+                if(l1.getAuteur()==null){
+                    error+=1;
+                }
+                l1.setDate(SDFormat.format(T_date.getDate()));
+                if(l1.getDate()==null){
+                    error+=1;
+                }
                 l1.setCode(T_code.getText());
-                l1.setDisponible(dispo.isSelected());
-                String[] tab = {String.valueOf(l1.getID()),l1.getLibelle(),l1.getAuteur(),l1.getDate(),l1.getCode(), String.valueOf(l1.getDisponible())};
-                tableModel.addRow(tab);//add to table
+                if(l1.getCode()==null){
+                    error+=1;
+                }
+                if(error>0){
+                    //error message
+                    System.out.println("error");
+                }
+                else {
+                    table_count += 1;
+                    l1.setID(table_count);
+                    l1.setCode(T_code.getText());
+                    l1.setDisponible(dispo.isSelected());
+                    String[] tab = {String.valueOf(l1.getID()), l1.getLibelle(), l1.getAuteur(), l1.getDate(), l1.getCode(), String.valueOf(l1.getDisponible())};
+                    tableModel.addRow(tab);//add to table
 
-                DBConnect dbConnect = new DBConnect();
-                dbConnect.ajouter(l1);//add to database
-
+                    DBConnect dbConnect = new DBConnect();
+                    dbConnect.ajouter(l1);//add to database
+                }
             }
         }
         if(e.getSource()==supprimer){
@@ -424,30 +398,64 @@ public class MyFrame extends JFrame implements ActionListener {
             T_auteur.setText(null);
         }
         if(e.getSource()==modifier){
-            if(selectedID != -1){
-                Livre l1 = new Livre();
-                l1.setID(selectedID);
-                System.out.println(l1.getID()+ "= id");
-                l1.setLibelle(T_libelle.getText());
-                l1.setAuteur(T_auteur.getText());
-                l1.setDate(SDFormat.format(T_date.getDate()));
-                l1.setCode(T_code.getText());
-                l1.setDisponible(dispo.isSelected());
+            if(verifText()>0){
+                System.out.println("veuillez remplir tous les champs et générer le code");
+            }else {
+                genererSteps();
+                if(selectedID != -1){
+                    Livre l1 = new Livre();
+                    l1.setID(selectedID);
+                    System.out.println(l1.getID()+ "= id");
+                    l1.setLibelle(T_libelle.getText());
+                    l1.setAuteur(T_auteur.getText());
+                    l1.setDate(SDFormat.format(T_date.getDate()));
+                    l1.setCode(T_code.getText());
+                    l1.setDisponible(dispo.isSelected());
 
-                tableModel.setValueAt(T_libelle.getText(),rowindex,1);
-                tableModel.setValueAt(T_auteur.getText(),rowindex,2);
-                tableModel.setValueAt(SDFormat.format(T_date.getDate()),rowindex,3);
-                tableModel.setValueAt(T_code.getText(),rowindex,4);
-                tableModel.setValueAt(dispo.isSelected(),rowindex,5);
+                    tableModel.setValueAt(T_libelle.getText(),rowindex,1);
+                    tableModel.setValueAt(T_auteur.getText(),rowindex,2);
+                    tableModel.setValueAt(SDFormat.format(T_date.getDate()),rowindex,3);
+                    tableModel.setValueAt(T_code.getText(),rowindex,4);
+                    tableModel.setValueAt(dispo.isSelected(),rowindex,5);
 
-                DBConnect dbConnect = new DBConnect();
-                dbConnect.modifier(l1);
-                T_date.setDate(null);
-                T_code.setText(null);
-                T_libelle.setText(null);
-                T_auteur.setText(null);
+                    DBConnect dbConnect = new DBConnect();
+                    dbConnect.modifier(l1);
+                    T_date.setDate(null);
+                    T_code.setText(null);
+                    T_libelle.setText(null);
+                    T_auteur.setText(null);
+                }
             }
+
         }
     }
+    public int verifText(){
+        int count =0;
+        if(Objects.equals(T_auteur.getText(), "") || T_auteur.getText()==null){
+            count+=1;
+        }
+        if(Objects.equals(T_libelle.getText(), "") || T_libelle.getText()==null){
+            count+=1;
+        }
+        if(T_date.getDate()==null){
+            System.out.println("vérification de la date");
+            count+=1;
+        }
+        System.out.println("count = "+count);
+        if(count>0){
+            JOptionPane.showMessageDialog(rootPane, "veuillez remplir tous les champs et générer le code!");
+        }
+        return count;
+    }
+    public void genererSteps() {
+        String format = SDFormat.format(T_date.getDate());
+        System.out.println(format);
+        String[] dateSep = format.split("-");
+        System.out.println("année "+ dateSep[2]);
+        String  genere = T_libelle.getText().charAt(0) + String.valueOf(T_libelle.getText().charAt(1)) + T_auteur.getText().charAt(T_auteur.getText().length()-2) + T_auteur.getText().charAt(T_auteur.getText().length()-1)+dateSep[2];
+        T_code.setText(genere);
+        System.out.println("généré");
+    }
+
 }
 
